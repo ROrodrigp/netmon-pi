@@ -68,9 +68,9 @@ def parse_arp_output(output: str) -> list[dict]:
         output: Raw output from arp-scan
 
     Returns:
-        List of device dictionaries with ip, mac, and vendor
+        List of unique device dictionaries with ip, mac, and vendor
     """
-    devices = []
+    seen = {}  # Key: (ip, mac) -> device dict
 
     # arp-scan output format: IP\tMAC\tVendor
     # Example: 192.168.1.1\taa:bb:cc:dd:ee:ff\tNETGEAR
@@ -82,13 +82,29 @@ def parse_arp_output(output: str) -> list[dict]:
     )
 
     for match in pattern.finditer(output):
-        devices.append({
-            "ip": match.group(1),
-            "mac": match.group(2).lower(),
-            "vendor": match.group(3).strip(),
-        })
+        ip = match.group(1)
+        mac = match.group(2).lower()
+        vendor_raw = match.group(3).strip()
 
-    # Sort by IP address
+        # Skip duplicate entries (arp-scan marks them as "DUP: N")
+        if "(DUP:" in vendor_raw:
+            continue
+
+        # Clean vendor string: remove tabs and extra parenthetical MAC addresses
+        vendor = re.sub(r"\t", " ", vendor_raw)  # Replace tabs with spaces
+        vendor = re.sub(r"\([0-9a-fA-F:]{17}\)", "", vendor)  # Remove MAC in parens
+        vendor = re.sub(r"\s+", " ", vendor).strip()  # Normalize whitespace
+
+        key = (ip, mac)
+        if key not in seen:
+            seen[key] = {
+                "ip": ip,
+                "mac": mac,
+                "vendor": vendor,
+            }
+
+    # Convert to list and sort by IP address
+    devices = list(seen.values())
     devices.sort(key=lambda d: tuple(map(int, d["ip"].split("."))))
 
     return devices
