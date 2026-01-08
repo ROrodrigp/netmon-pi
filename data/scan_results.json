@@ -1,0 +1,33 @@
+{
+  "scan_timestamp": "2026-01-08T15:42:08",
+  "host": "raspberrypi",
+  "interface": "wlan0",
+  "devices_count": 5,
+  "devices": [
+    {
+      "ip": "192.168.0.1",
+      "mac": "02:10:18:d6:cf:8c",
+      "vendor": "(Unknown: locally administered)"
+    },
+    {
+      "ip": "192.168.0.52",
+      "mac": "6e:70:db:8c:52:cf",
+      "vendor": "(Unknown: locally administered)"
+    },
+    {
+      "ip": "192.168.0.56",
+      "mac": "36:3a:76:d4:c5:4e",
+      "vendor": "(Unknown: locally administered)"
+    },
+    {
+      "ip": "192.168.0.62",
+      "mac": "e4:60:17:f7:29:8e",
+      "vendor": "Intel Corporate"
+    },
+    {
+      "ip": "192.168.0.77",
+      "mac": "a2:67:b2:7a:6b:91",
+      "vendor": "(Unknown: locally administered)"
+    }
+  ]
+}
