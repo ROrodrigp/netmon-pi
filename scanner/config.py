@@ -13,3 +13,6 @@ NETWORK_INTERFACE = None  # None = auto-detect, or specify like "wlan0", "eth0"
 
 # Timestamp format
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S"
+
+# Git settings
+AUTO_PUSH = True  # Push to GitHub after each scan

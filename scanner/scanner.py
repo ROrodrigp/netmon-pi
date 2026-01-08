@@ -3,6 +3,7 @@
 Network scanner using arp-scan.
 Detects devices on the local network and saves results to JSON.
 """
+import argparse
 import json
 import re
 import socket
@@ -11,8 +12,10 @@ import sys
 from datetime import datetime
 
 from config import (
+    AUTO_PUSH,
     DATA_DIR,
     NETWORK_INTERFACE,
+    PROJECT_ROOT,
     SCAN_RESULTS_FILE,
     TIMESTAMP_FORMAT,
 )
@@ -138,8 +141,77 @@ def save_results(devices: list[dict], interface: str) -> dict:
     return results
 
 
+def git_push(devices_count: int) -> bool:
+    """
+    Commit and push scan results to GitHub.
+
+    Args:
+        devices_count: Number of devices found (for commit message)
+
+    Returns:
+        True if push succeeded, False otherwise
+    """
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    commit_msg = f"Scan: {timestamp} - {devices_count} devices"
+
+    try:
+        # Stage the results file
+        subprocess.run(
+            ["git", "add", "data/scan_results.json"],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            check=True,
+        )
+
+        # Check if there are changes to commit
+        status = subprocess.run(
+            ["git", "diff", "--cached", "--quiet"],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+        )
+
+        if status.returncode == 0:
+            print("No changes to commit")
+            return True
+
+        # Commit
+        subprocess.run(
+            ["git", "commit", "-m", commit_msg],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            check=True,
+        )
+
+        # Push
+        subprocess.run(
+            ["git", "push"],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            check=True,
+        )
+
+        print(f"Pushed to GitHub: {commit_msg}")
+        return True
+
+    except subprocess.CalledProcessError as e:
+        print(f"Git error: {e.stderr.decode() if e.stderr else 'unknown error'}", file=sys.stderr)
+        return False
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Network scanner using arp-scan")
+    parser.add_argument(
+        "--no-push",
+        action="store_true",
+        help="Skip pushing results to GitHub",
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
     """Main entry point."""
+    args = parse_args()
     print(f"Starting network scan at {datetime.now().strftime(TIMESTAMP_FORMAT)}")
 
     try:
@@ -159,6 +231,13 @@ def main() -> int:
         print("\nDevices found:")
         for device in devices:
             print(f"  {device['ip']:15} {device['mac']}  {device['vendor']}")
+
+        # Push to GitHub if enabled
+        if AUTO_PUSH and not args.no_push:
+            print("\nPushing to GitHub...")
+            git_push(len(devices))
+        elif args.no_push:
+            print("\nSkipping push (--no-push flag)")
 
         return 0
 
