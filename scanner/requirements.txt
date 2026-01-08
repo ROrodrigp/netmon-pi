@@ -1,0 +1,10 @@
+# Scanner dependencies
+# Phase 1 uses only Python standard library:
+# - subprocess (execute arp-scan)
+# - json (serialize results)
+# - datetime (timestamps)
+# - socket (get hostname)
+# - re (parse output)
+# - pathlib (file paths)
+
+# No external dependencies required
