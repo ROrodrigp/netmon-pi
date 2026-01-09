@@ -1,8 +1,8 @@
 {
-  "scan_timestamp": "2026-01-08T22:39:38",
+  "scan_timestamp": "2026-01-08T22:42:02",
   "host": "raspberrypi",
   "interface": "wlan0",
-  "devices_count": 2,
+  "devices_count": 4,
   "devices": [
     {
       "ip": "192.168.0.1",
@@ -13,6 +13,16 @@
       "ip": "192.168.0.62",
       "mac": "e4:60:17:f7:29:8e",
       "vendor": "Intel Corporate"
+    },
+    {
+      "ip": "192.168.0.125",
+      "mac": "58:66:6d:30:c2:30",
+      "vendor": "(Unknown)"
+    },
+    {
+      "ip": "192.168.0.242",
+      "mac": "22:d1:bd:7d:60:61",
+      "vendor": "(Unknown: locally administered)"
     }
   ]
 }
