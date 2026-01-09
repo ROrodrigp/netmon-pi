@@ -48,57 +48,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      # Paso 3: Validar el JSON y mostrar resumen
-      # Usamos Python inline (sin archivo separado) para mantenerlo simple
-      - name: Validate and summarize scan results
-        run: |
-          python << 'EOF'
-          import json
-          import sys
-          from datetime import datetime
-
-          # Leer el archivo JSON
-          try:
-              with open('data/scan_results.json', 'r') as f:
-                  data = json.load(f)
-          except FileNotFoundError:
-              print("ERROR: scan_results.json not found")
-              sys.exit(1)
-          except json.JSONDecodeError as e:
-              print(f"ERROR: Invalid JSON - {e}")
-              sys.exit(1)
-
-          # Validar campos requeridos
-          required_fields = ['scan_timestamp', 'host', 'interface', 'devices_count', 'devices']
-          missing = [f for f in required_fields if f not in data]
-
-          if missing:
-              print(f"ERROR: Missing required fields: {missing}")
-              sys.exit(1)
-
-          # Validar que devices sea una lista
-          if not isinstance(data['devices'], list):
-              print("ERROR: 'devices' must be a list")
-              sys.exit(1)
-
-          # Validar estructura de cada dispositivo
-          for i, device in enumerate(data['devices']):
-              for field in ['ip', 'mac', 'vendor']:
-                  if field not in device:
-                      print(f"ERROR: Device {i} missing field '{field}'")
-                      sys.exit(1)
-
-          # Todo válido - mostrar resumen
-          print("=" * 60)
-          print("SCAN RESULTS VALIDATED SUCCESSFULLY")
-          print("=" * 60)
-          print(f"Timestamp:    {data['scan_timestamp']}")
-          print(f"Host:         {data['host']}")
-          print(f"Interface:    {data['interface']}")
-          print(f"Device count: {data['devices_count']}")
-          print("-" * 60)
-          print("Devices:")
-          for device in data['devices']:
-              print(f"  {device['ip']:15} {device['mac']}  {device['vendor']}")
-          print("=" * 60)
-          EOF
+      # Paso 3: Ejecutar script de validación
+      # El script está en scripts/validate_scan.py
+      # Si el JSON es inválido, el script retorna exit code 1 y el workflow falla
+      - name: Validate scan results
+        run: python scripts/validate_scan.py
